@@ -1428,10 +1428,6 @@ int main (int argc, char *argv[]) {
 				dirty = 1;
 			}
 			else if (recents->count > 0 && can_resume && PAD_justReleased(BTN_RESUME)) {
-				// TODO: This is crappy af - putting this here since it works, but
-				// super inefficient. Why are Recents not decorated with type, and need
-				// to be remade into Entries via getRecents()? - need to understand the 
-				// architecture more...
 				Entry *selectedEntry = entryFromRecent(recents->items[switcher_selected]);
 				should_resume = 1;
 				Entry_open(selectedEntry);
@@ -1627,6 +1623,7 @@ int main (int argc, char *argv[]) {
 			int ow = GFX_blitHardwareGroup(screen, show_setting);
 			
 			if (show_version) {
+				// TODO : tarro - simple user manual and options (brightness, volume, etc)
 				if (!version) {
 					char release[256];
 					getFile(ROOT_SYSTEM_PATH "/version.txt", release, 256);
@@ -1638,12 +1635,11 @@ int main (int argc, char *argv[]) {
 					tmp = strchr(release, '\n');
 					tmp[0] = '\0';
 					
-					// TODO: not sure if I want bare PLAT_* calls here
 					char* extra_key = "Model";
 					char* extra_val = PLAT_getModel(); 
 					
 					SDL_Surface* release_txt = TTF_RenderUTF8_Blended(font.large, "Release", COLOR_DARK_TEXT);
-					SDL_Surface* version_txt = TTF_RenderUTF8_Blended(font.large, release, COLOR_WHITE);
+					SDL_Surface* version_txt = TTF_RenderUTF8_Blended(font.large, "MinUit-beta", COLOR_WHITE);
 					SDL_Surface* commit_txt = TTF_RenderUTF8_Blended(font.large, "Commit", COLOR_DARK_TEXT);
 					SDL_Surface* hash_txt = TTF_RenderUTF8_Blended(font.large, commit, COLOR_WHITE);
 					
@@ -1685,9 +1681,8 @@ int main (int argc, char *argv[]) {
 				SDL_BlitSurface(version, NULL, screen, &(SDL_Rect){(screen->w-version->w)/2,(screen->h-version->h)/2});
 				
 				// buttons (duped and trimmed from below)
-				if (show_setting && !GetHDMI()) GFX_blitHardwareHints(screen, show_setting);
-				else GFX_blitButtonGroup((char*[]){ BTN_SLEEP==BTN_POWER?"POWER":"MENU","SLEEP",  NULL }, 0, screen, 0);
-				
+				// if (show_setting && !GetHDMI()) GFX_blitHardwareHints(screen, show_setting);
+				// else GFX_blitButtonGroup((char*[]){ "SELECT","JUMP",  NULL }, 0, screen, 0);
 				GFX_blitButtonGroup((char*[]){ "B","BACK",  NULL }, 0, screen, 1);
 			}
 			else if(show_switcher) {
@@ -1724,7 +1719,7 @@ int main (int argc, char *argv[]) {
 					}
 					else if (has_boxart) {					
 						// no preview load box art instead (if available)
-						SDL_Surface* png = IMG_Load(boxart_path)
+						SDL_Surface* png = IMG_Load(boxart_path);
 						SDL_Surface* raw_boxart = SDL_ConvertSurface(png, screen->format, SDL_SWSURFACE);
 						SDL_Rect image_rect = {0, 0, raw_boxart->w, raw_boxart->h};
 						SDL_Rect boxart_rect = {ox, oy, hw, hh};
@@ -1735,7 +1730,8 @@ int main (int argc, char *argv[]) {
 						SDL_FreeSurface(png);
 					}
 					else {
-						// no preview or box art, just fill the screen
+						// no preview or box art, show placeholder
+						// TODO : tarro - use a better placeholder
 						SDL_Rect preview_rect = {ox,oy,hw,hh};
 						SDL_FillRect(screen, &preview_rect, 0);
 						GFX_blitMessage(font.large, "No Preview", screen, &preview_rect);
@@ -1747,12 +1743,12 @@ int main (int argc, char *argv[]) {
 						int max_width = screen->w - SCALE1(PADDING * 2) - ow;
 						
 						char display_name[256];
-						int text_width = GFX_truncateText(font.large, selectedEntry->name, display_name, max_width, SCALE1(BUTTON_PADDING*2));
+						int text_width = GFX_truncateText(font.medium, selectedEntry->name, display_name, max_width, SCALE1(BUTTON_PADDING*2));
 						max_width = MIN(max_width, text_width);
 
 						SDL_Surface* text;
-						text = TTF_RenderUTF8_Blended(font.large, display_name, COLOR_WHITE);
-						GFX_blitPill(ASSET_BLACK_PILL, screen, &(SDL_Rect){
+						text = TTF_RenderUTF8_Blended(font.medium, display_name, COLOR_BLACK);
+						GFX_blitPill(ASSET_DARK_GRAY_PILL, screen, &(SDL_Rect){
 							SCALE1(PADDING),
 							SCALE1(PADDING),
 							max_width,
@@ -1772,11 +1768,16 @@ int main (int argc, char *argv[]) {
 
 					// pagination
 					{
-
+						ox += (pw-SCALE1(15*recents->count))/2;
+						oy += hh+SCALE1(WINDOW_RADIUS);
+						for (int i=0; i<recents->count; i++) {
+							if (i==switcher_selected)GFX_blitAsset(ASSET_PAGE, NULL, screen, &(SDL_Rect){ox+SCALE1(i*15),oy});
+							else GFX_blitAsset(ASSET_DOT, NULL, screen, &(SDL_Rect){ox+SCALE1(i*15)+4,oy+SCALE1(2)});
+						}
 					}
 
 					if(can_resume) GFX_blitButtonGroup((char*[]){ "X","RESUME",  NULL }, 0, screen, 0);
-					else GFX_blitButtonGroup((char*[]){ BTN_SLEEP==BTN_POWER?"POWER":"MENU","SLEEP",  NULL }, 0, screen, 0);
+					else GFX_blitButtonGroup((char*[]){ "SELECT","EXPLORE",  NULL }, 0, screen, 0);
 
 					GFX_blitButtonGroup((char*[]){ "B","BACK", "A", "OPEN", NULL }, 1, screen, 1);
 					
@@ -1849,15 +1850,15 @@ int main (int argc, char *argv[]) {
 				}
 				else {
 					// TODO: for some reason screen's dimensions end up being 0x0 in GFX_blitMessage...
-					GFX_blitMessage(font.large, "Empty folder", screen, &(SDL_Rect){0,0,screen->w,screen->h}); //, NULL);
+					GFX_blitMessage(font.large, "No games here yet.", screen, &(SDL_Rect){0,0,screen->w,screen->h}); //, NULL);
 				}
 			
 				// buttons
 				if (show_setting && !GetHDMI()) GFX_blitHardwareHints(screen, show_setting);
-				else if (can_resume) GFX_blitButtonGroup((char*[]){ "X","RESUME",  NULL }, 0, screen, 0);
+				else if (can_resume) GFX_blitButtonGroup((char*[]){ "X","RESUME",  "SELECT","JUMP" }, 0, screen, 0);
 				else GFX_blitButtonGroup((char*[]){ 
-					BTN_SLEEP==BTN_POWER?"POWER":"MENU",
-					BTN_SLEEP==BTN_POWER||simple_mode?"SLEEP":"INFO",  
+					"SELECT",
+					"JUMP",  
 					NULL }, 0, screen, 0);
 			
 				if (total==0) {
