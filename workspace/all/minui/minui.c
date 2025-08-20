@@ -425,6 +425,7 @@ static Array* recents; // RecentArray
 
 static int quit = 0;
 static int can_resume = 0;
+static int has_boxart = 0; // set to 1 if box art is available
 static int should_resume = 0; // set to 1 on BTN_RESUME but only if can_resume==1
 static int simple_mode = 0;
 static int has_preview = 0;
@@ -432,6 +433,7 @@ static int show_switcher = 0;
 static int switcher_selected = 0;
 static char slot_path[256];
 static char preview_path[256];
+static char boxart_path[256];
 
 static int restore_depth = -1;
 static int restore_relative = -1;
@@ -999,6 +1001,7 @@ static char* escapeSingleQuotes(char* str) {
 
 static void readyResumePath(char* rom_path, int type) {
 	char* tmp;
+	has_boxart = 0;
 	can_resume = 0;
 	has_preview = 0;
 	char path[256];
@@ -1031,11 +1034,23 @@ static void readyResumePath(char* rom_path, int type) {
 	tmp = strrchr(path, '/') + 1;
 	strcpy(rom_file, tmp);
 	
+	char folder_path[256];
+	char *slash = strrchr(path, '/');
+	if (slash) {
+		size_t len = slash - path;
+		strncpy(folder_path, path, len);
+		folder_path[len] = '\0'; // null-terminate the string
+	} else {
+		strcpy(folder_path, path); // fallback: no slash found, copy whole path
+	}
+
 	sprintf(slot_path, "%s/.minui/%s/%s.txt", SHARED_USERDATA_PATH, emu_name, rom_file); // /.userdata/.minui/<EMU>/<romname>.ext.txt
 	sprintf(preview_path, "%s/.minui/%s/%s.0.bmp", SHARED_USERDATA_PATH, emu_name, rom_file); // /.userdata/.minui/<EMU>/<romname>.ext.0.bmp
+	sprintf(boxart_path, "%s/.res/%s.png", folder_path, rom_file);
 
 	can_resume = exists(slot_path);
 	has_preview = exists(preview_path);
+	has_boxart = exists(boxart_path);
 
 }
 static void readyResume(Entry* entry) {
@@ -1294,32 +1309,6 @@ static void loadLast(void) { // call after loading root directory
 	}
 	
 	StringArray_free(last);
-}
-
-///////////////////////////////////////
-static SDL_Rect GFX_scaled_rect(SDL_Rect preview_rect, SDL_Rect image_rect) {
-    SDL_Rect scaled_rect;
-    
-    // Calculate the aspect ratios
-    float image_aspect = (float)image_rect.w / (float)image_rect.h;
-    float preview_aspect = (float)preview_rect.w / (float)preview_rect.h;
-    
-    // Determine scaling factor
-    if (image_aspect > preview_aspect) {
-        // Image is wider than the preview area
-        scaled_rect.w = preview_rect.w;
-        scaled_rect.h = (int)(preview_rect.w / image_aspect);
-    } else {
-        // Image is taller than or equal to the preview area
-        scaled_rect.h = preview_rect.h;
-        scaled_rect.w = (int)(preview_rect.h * image_aspect);
-    }
-    
-    // Center the scaled rectangle within preview_rect
-    scaled_rect.x = preview_rect.x + (preview_rect.w - scaled_rect.w) / 2;
-    scaled_rect.y = preview_rect.y + (preview_rect.h - scaled_rect.h) / 2;
-    
-    return scaled_rect;
 }
 
 ///////////////////////////////////////
@@ -1733,7 +1722,20 @@ int main (int argc, char *argv[]) {
 						SDL_FreeSurface(raw_preview);
 						SDL_FreeSurface(bmp);
 					}
+					else if (has_boxart) {					
+						// no preview load box art instead (if available)
+						SDL_Surface* png = IMG_Load(boxart_path)
+						SDL_Surface* raw_boxart = SDL_ConvertSurface(png, screen->format, SDL_SWSURFACE);
+						SDL_Rect image_rect = {0, 0, raw_boxart->w, raw_boxart->h};
+						SDL_Rect boxart_rect = {ox, oy, hw, hh};
+						SDL_Rect scaled_rect = GFX_scaled_rect(boxart_rect, image_rect);
+						SDL_FillRect(screen, NULL, 0);
+						SDL_BlitScaled(raw_boxart, NULL, screen, &scaled_rect);
+						SDL_FreeSurface(raw_boxart);
+						SDL_FreeSurface(png);
+					}
 					else {
+						// no preview or box art, just fill the screen
 						SDL_Rect preview_rect = {ox,oy,hw,hh};
 						SDL_FillRect(screen, &preview_rect, 0);
 						GFX_blitMessage(font.large, "No Preview", screen, &preview_rect);
