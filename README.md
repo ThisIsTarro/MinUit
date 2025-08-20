@@ -1,13 +1,21 @@
-# MinUI
+# MinUIt
 
-MinUI is a focused, custom launcher and libretro frontend for [a variety of retro handhelds](#supported-devices).
+MinUIt (means midnight in french) is the continuiation of MinUI : a focused, custom launcher and libretro frontend for [a variety of retro handhelds](#supported-devices).
+The goal for the first release is to implement QOL improvements to the frontend while keeping the original vision for simplicity, notably :
+- [] Simple Menus for standalone emulators and utility paks (wrapper so anyone can use it to implement what they want and maintain design coherence)
+- [] Auto-save and auto-resume for standalone emulators, with same behaviour than in minarch (savestates screenshots, resume from frontend, autosave on shutdown...)
+- [] Better use of the show-version screen (Global options for brightness/volume/simple mode/wifi ?)
+- [x] A Onion OS-like game switcher based on Recents list you could access from ingame (MENU + SELECT shorctut / new option in menu) and from the game list (SELECT) 
+- [] A purpose for the Y button ("Add to collection" ? Sort ? Search ?)
 
+I only own a RGB30, so I will mostly use this for testing, but I'll try my best to have platform agnostic code.
+If you want to help test for other devices (listed below), [please do and report on my Discord or ping me on the RertroHandheld Discord.](https://discord.gg/MG6SNMrrBd)
 <img src="github/minui-main.png" width=320 /> <img src="github/minui-menu-gbc.png" width=320 /> 
 
 ## Features
 
 - Simple launcher, simple SD card
-- No settings or configuration
+- No settings or configuration{({#
 - No boxart, themes, or distractions
 - Automatically hides hidden files
   and extension and region/version 
@@ -32,7 +40,6 @@ MinUI is a focused, custom launcher and libretro frontend for [a variety of retr
   multiple devices from different
   manufacturers
 
-You can [grab the latest version here](https://github.com/shauninman/MinUI/releases).
 
 > Devices with a physical power switch
 > use MENU to sleep and wake instead of
@@ -61,31 +68,34 @@ Extras:
 - Super Game Boy
 - TurboGrafx-16 (and TurboGrafx-CD)
 - Virtual Boy
-
+- **N64** // in development
+- **PSP** // in development
+- **NDS** // will be in first release
+  
 ## Supported Devices
 
 | Device | Added | Status |
 | -- | -- | -- |
 | Anbernic RG28xx | MinUI-20240429b-2 | Maintained |
 | Anbernic RG34xx | MinUI-20241227-0 | Maintained |
-| Anbernic RG35xx | MinUI-20230922b-2 | Deprecated |
+| Anbernic RG35xx | MinUI-20230922b-2 | Maintained |
 | Anbernic RG35xx Plus | MinUI-20240106b-0 | Maintained |
 | Anbernic RG35xxH | MinUI-20240120b-1 | Maintained |
 | Anbernic RG35xxSP | MinUI-20240525-0 | Maintained |
 | Anbernic RG40xxH | MinUI-20240717-1 | Maintained |
 | Anbernic RG40xxV | MinUI-20240831-0 | Maintained | 
-| Anbernic RG CubeXX | MinUI-202401028-0 | Active | 
-| GKD Pixel | MinUI-20240120b-1 | Deprecated |
-| M17 | MinUI-20231126b-2 | Deprecated |
-| MagicX XU Mini M | MinUI-20240831-0 | Deprecated | 
-| MagicX Mini Zero 28 | MinUI-20250111-0 | Active |
+| Anbernic RG CubeXX | MinUI-202401028-0 | Maintained | 
+| GKD Pixel | MinUI-20240120b-1 | Maintained |
+| M17 | MinUI-20231126b-2 | Maintained |
+| MagicX XU Mini M | MinUI-20240831-0 | Maintained | 
+| MagicX Mini Zero 28 | MinUI-20250111-0 | Maintained |
 | Miyoo A30 | MinUI-20240705-0 | Maintained |
-| Miyoo Flip | MinUI-20250111-0 | Active |
-| Miyoo Mini | MinUI-20230922b-2 | Deprecated |
-| Miyoo Mini Plus | MinUI-20230922b-2 | Deprecated |
-| Powkiddy RGB30 | MinUI-20231014b-1 | Deprecated |
-| Trimui Brick | MinUI-20241028-0 | Active |
-| Trimui Smart | MinUI-20230922b-2 | Deprecated |
+| Miyoo Flip | MinUI-20250111-0 | Maintained |
+| Miyoo Mini | MinUI-20230922b-2 | Maintained |
+| Miyoo Mini Plus | MinUI-20230922b-2 | Maintained |
+| Powkiddy RGB30 | MinUI-20231014b-1 | Maintained |
+| Trimui Brick | MinUI-20241028-0 | Maintained |
+| Trimui Smart | MinUI-20230922b-2 | Maintained |
 | Trimui Smart Pro | MinUI-20231111b-2 | Maintained |
 
 > [!NOTE]
@@ -94,15 +104,3 @@ Extras:
 > **Deprecated** will be retired in a future update  
 > **Retired** removed from repo, no longer updated or packaged with new releases  
 
-## Legacy versions
-
-The original Trimui Model S version of MinUI (2021/04/03-2021/08/06) has been archived [here](https://github.com/shauninman/MinUI-Legacy-Trimui-Model-S).
-
-The sequel, MiniUI for the Miyoo Mini (2022/04/20-2022/10/23), has been archived [here](https://github.com/shauninman/MiniUI-Legacy-Miyoo-Mini).
-
-The return of MinUI for the original Anbernic RG35XX (2023/02/26-2023/03/26) has been archived [here](https://github.com/shauninman/MinUI-Legacy-RG35XX).
-
-The current MinUI which introduced support for multiple devices starting with the Trimui Smart, Miyoo Mini (and Plus), and the original Anbernic RG35XX was released on [2023/09/22][init-release] with the initial functional commit 6 months earlier on [2023/03/27][init-commit].
-
-[init-release]:https://github.com/shauninman/MinUI/releases/tag/v20230922b-2
-[init-commit]:https://github.com/shauninman/MinUI/commit/53e0296ea5a2794290fb5783765af6cee0063445#diff-b993e61ab6e66a19b67c88cfb98261aa9267d250de8bb56463662f67aae1a558
